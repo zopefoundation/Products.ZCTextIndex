@@ -183,7 +183,7 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
             if safe_callable(text):
                 text = text()
             if text is not None:
-                if isinstance(text, (list, tuple, )):
+                if isinstance(text, (list, tuple, set)):
                     all_texts.extend(text)
                 else:
                     all_texts.append(text)
