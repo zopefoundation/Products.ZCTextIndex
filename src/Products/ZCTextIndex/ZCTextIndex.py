@@ -170,11 +170,10 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
         each of which should yield either a string or a list of
         strings (Unicode or otherwise) to be passed to index_doc().
         """
-        # XXX We currently ignore subtransaction threshold
+        # TODO we currently ignore subtransaction threshold
 
         # needed for backward compatibility
-        try: fields = self._indexed_attrs
-        except: fields  = [ self._fieldname ]
+        fields = getattr(self, '_indexed_attrs', [self._fieldname])
 
         res = 0
         all_texts = []
