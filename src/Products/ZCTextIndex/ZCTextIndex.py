@@ -175,7 +175,6 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
         # needed for backward compatibility
         fields = getattr(self, '_indexed_attrs', [self._fieldname])
 
-        res = 0
         all_texts = []
         for attr in fields:
             text = getattr(obj, attr, None)
@@ -195,7 +194,7 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
         all_texts = [t for t in all_texts if isinstance(t, basestring)]
         if all_texts or self.index.length():
             return self.index.index_doc(documentId, all_texts)
-        return res
+        return 0
 
     def unindex_object(self, docid):
         if self.index.has_doc(docid):
