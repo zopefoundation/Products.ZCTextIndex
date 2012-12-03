@@ -182,9 +182,7 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
                 continue
             if safe_callable(text):
                 text = text()
-            if text is None:
-                continue
-            if text:
+            if text is not None:
                 if isinstance(text, (list, tuple, )):
                     all_texts.extend(text)
                 else:
@@ -192,7 +190,7 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
 
         # Check that we're sending only strings
         all_texts = [t for t in all_texts if isinstance(t, basestring)]
-        if all_texts or self.index.length():
+        if all_texts:
             return self.index.index_doc(documentId, all_texts)
         return 0
 
