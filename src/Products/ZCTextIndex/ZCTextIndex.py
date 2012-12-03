@@ -192,8 +192,7 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
                     all_texts.append(text)
 
         # Check that we're sending only strings
-        all_texts = filter(lambda text: isinstance(text, basestring), \
-                           all_texts)
+        all_texts = [t for t in all_texts if isinstance(t, basestring)]
         if all_texts or self.index.length():
             return self.index.index_doc(documentId, all_texts)
         return res
