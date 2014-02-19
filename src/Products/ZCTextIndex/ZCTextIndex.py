@@ -261,6 +261,10 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
         except:
             return [self._fieldname]
 
+    def getIndexQueryNames(self):
+        """Indicate that this index applies to queries for the index's name."""
+        return (self.id,)
+
     def getIndexType(self):
         """Return index type string"""
         return getattr(self, '_index_type', self._index_factory.__name__)

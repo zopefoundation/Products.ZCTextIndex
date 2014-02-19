@@ -4,6 +4,7 @@ Changelog
 2.13.5 (unreleased)
 -------------------
 
+- Add `getIndexQueryNames` method to index to comply with extended interface.
 
 2.13.4 (2012-12-03)
 -------------------
