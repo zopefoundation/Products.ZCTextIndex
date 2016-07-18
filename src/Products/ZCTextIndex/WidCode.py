@@ -57,10 +57,8 @@
 # the encoding is
 #    1abcdefg 0hijkLmn 0opqrstu 0vwxyzAB
 
-assert 0x80**2 == 0x4000
-assert 0x80**4 == 0x10000000
-
 import re
+
 
 def encode(wids):
     # Encode a list of wids as a string.
@@ -68,7 +66,8 @@ def encode(wids):
     n = len(wid2enc)
     return "".join([w < n and wid2enc[w] or _encode(w) for w in wids])
 
-_encoding = [None] * 0x4000 # Filled later, and converted to a tuple
+_encoding = [None] * 0x4000  # Filled later, and converted to a tuple
+
 
 def _encode(w):
     assert 0x4000 <= w < 0x10000000
@@ -83,6 +82,7 @@ def _encode(w):
 
 _prog = re.compile(r"[\x80-\xFF][\x00-\x7F]*")
 
+
 def decode(code):
     # Decode a string into a list of wids.
     get = _decoding.get
@@ -90,7 +90,8 @@ def decode(code):
     # so the "or" here calls _decode('\x80') anyway.
     return [get(p) or _decode(p) for p in _prog.findall(code)]
 
-_decoding = {} # Filled later
+_decoding = {}  # Filled later
+
 
 def _decode(s):
     if s == '\x80':
@@ -100,10 +101,11 @@ def _decode(s):
         a, b, c = map(ord, s)
         assert a & 0x80 == 0x80 and not b & 0x80 and not c & 0x80
         return ((a & 0x7F) << 14) | (b << 7) | c
-    assert len(s) == 4, `s`
+    assert len(s) == 4, repr(s)
     a, b, c, d = map(ord, s)
     assert a & 0x80 == 0x80 and not b & 0x80 and not c & 0x80 and not d & 0x80
     return ((a & 0x7F) << 21) | (b << 14) | (c << 7) | d
+
 
 def _fill():
     global _encoding

@@ -15,7 +15,8 @@ from zope.interface import implements
 
 from Products.ZCTextIndex.interfaces import IPipelineElementFactory
 
-class PipelineElementFactory:
+
+class PipelineElementFactory(object):
 
     implements(IPipelineElementFactory)
 
@@ -23,8 +24,7 @@ class PipelineElementFactory:
         self._groups = {}
 
     def registerFactory(self, group, name, factory):
-        if self._groups.has_key(group) and \
-           self._groups[group].has_key(name):
+        if group in self._groups and name in self._groups[group]:
             raise ValueError('ZCTextIndex lexicon element "%s" '
                              'already registered in group "%s"'
                              % (name, group))

@@ -14,6 +14,7 @@
 
 import unittest
 
+
 class ParseTreeTests(unittest.TestCase):
 
     def _conforms(self, klass):
@@ -48,12 +49,3 @@ class ParseTreeTests(unittest.TestCase):
     def test_PhraseNode_conforms_to_IQueryParseTree(self):
         from Products.ZCTextIndex.ParseTree import PhraseNode
         self._conforms(PhraseNode)
-
-
-def test_suite():
-    return unittest.TestSuite((
-            unittest.makeSuite(ParseTreeTests),
-        ))
-
-if __name__=="__main__":
-    unittest.main(defaultTest='test_suite')

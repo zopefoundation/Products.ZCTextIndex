@@ -11,23 +11,24 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""ZCTextIndex unit tests.
-
-$Id$
-"""
-
-import unittest
 
 import re
+import unittest
 
 import Acquisition
 from zExceptions import NotFound
 
 from Products.ZCTextIndex.ZCTextIndex import ZCTextIndex, PLexicon
-from Products.ZCTextIndex.tests import \
-     testIndex, testQueryEngine, testQueryParser
-from Products.ZCTextIndex.BaseIndex import \
-     scaled_int, SCALE_FACTOR, inverse_doc_frequency
+from Products.ZCTextIndex.tests import (
+    testIndex,
+    testQueryEngine,
+    testQueryParser,
+)
+from Products.ZCTextIndex.BaseIndex import (
+    scaled_int,
+    SCALE_FACTOR,
+    inverse_doc_frequency,
+)
 from Products.ZCTextIndex.CosineIndex import CosineIndex
 from Products.ZCTextIndex.OkapiIndex import OkapiIndex
 from Products.ZCTextIndex.Lexicon import Splitter
@@ -37,35 +38,39 @@ from Products.ZCTextIndex.StopDict import get_stopdict
 from Products.ZCTextIndex.ParseTree import ParseError
 
 
-class Indexable:
+class Indexable(object):
     def __init__(self, text):
         self.text = text
 
-class Indexable2:
+
+class Indexable2(object):
     def __init__(self, text1, text2):
         self.text1 = text1
         self.text2 = text2
+
 
 class LexiconHolder(Acquisition.Implicit):
     def __init__(self, lexicon):
         self.lexicon = lexicon
 
     def getPhysicalPath(self):
-        return ('',) # Pretend to be the root
+        return ('',)  # Pretend to be the root
+
 
 def dummyUnrestrictedTraverse(self, path):
     if path == ('', 'lexicon',):
         return self.lexicon
-    raise NotFound, path
+    raise NotFound(path)
 
 # The tests classes below create a ZCTextIndex().  Then they create
 # instance variables that point to the internal components used by
 # ZCTextIndex.  These tests run the individual module unit tests with
 # the fully integrated ZCTextIndex.
 
+
 def eq(scaled1, scaled2, epsilon=scaled_int(0.01)):
     if abs(scaled1 - scaled2) > epsilon:
-        raise AssertionError, "%s != %s" % (scaled1, scaled2)
+        raise AssertionError("%s != %s" % (scaled1, scaled2))
 
 # A series of text chunks to use for the re-index tests (testDocUpdate).
 text = [
@@ -106,7 +111,8 @@ text = [
 # Subclasses should derive from one of testIndex.{CosineIndexTest,
 # OkapiIndexTest} too.
 
-class ZCIndexTestsBase:
+
+class ZCIndexTestsBase(object):
 
     def setUp(self):
         self.lexicon = PLexicon('lexicon', '',
@@ -122,7 +128,6 @@ class ZCIndexTestsBase:
                                     'lexicon')
         self.index = self.zc_index.index
 
-
     def parserFailure(self, query):
         self.assertRaises(ParseError, self.zc_index.query, query)
 
@@ -133,15 +138,11 @@ class ZCIndexTestsBase:
             self.assertEqual(r[0][0], 1)
 
     def testMultipleAttributes(self):
-        lexicon = PLexicon('lexicon', '',
-                            Splitter(),
-                            CaseNormalizer(),
-                            StopWordRemover())
         caller = LexiconHolder(self.lexicon)
         zc_index = ZCTextIndex('name',
-                                None,
-                                caller,
-                                self.IndexFactory,
+                               None,
+                               caller,
+                               self.IndexFactory,
                                'text1,text2',
                                'lexicon')
         doc = Indexable2('foo bar', 'alpha omega')
@@ -154,18 +155,14 @@ class ZCIndexTestsBase:
         self.assertEqual(len(nbest), 0)
 
     def testListAttributes(self):
-        lexicon = PLexicon('lexicon', '',
-                            Splitter(),
-                            CaseNormalizer(),
-                            StopWordRemover())
         caller = LexiconHolder(self.lexicon)
         zc_index = ZCTextIndex('name',
-                                None,
-                                caller,
-                                self.IndexFactory,
+                               None,
+                               caller,
+                               self.IndexFactory,
                                'text1,text2',
                                'lexicon')
-        doc = Indexable2('Hello Tim', \
+        doc = Indexable2('Hello Tim',
                          ['Now is the winter of our discontent',
                           'Made glorious summer by this sun of York', ])
         zc_index.index_object(1, doc)
@@ -177,15 +174,11 @@ class ZCIndexTestsBase:
         self.assertEqual(len(nbest), 0)
 
     def testReindex(self):
-        lexicon = PLexicon('lexicon', '',
-                            Splitter(),
-                            CaseNormalizer(),
-                            StopWordRemover())
         caller = LexiconHolder(self.lexicon)
         zc_index = ZCTextIndex('name',
-                                None,
-                                caller,
-                                self.IndexFactory,
+                               None,
+                               caller,
+                               self.IndexFactory,
                                'text',
                                'lexicon')
         doc = Indexable('Hello Tim')
@@ -242,19 +235,19 @@ class ZCIndexTestsBase:
         N = len(text)
         stop = get_stopdict()
 
-        d = {} # word -> list of version numbers containing that word
+        d = {}  # word -> list of version numbers containing that word
         for version, i in zip(text, range(N)):
             # use a simple splitter rather than an official one
             words = [w for w in re.split("\W+", version.lower())
-                     if len(w) > 1 and not stop.has_key(w)]
+                     if len(w) > 1 and w not in stop]
             word_seen = {}
             for w in words:
-                if not word_seen.has_key(w):
+                if w not in word_seen:
                     d.setdefault(w, []).append(i)
                     word_seen[w] = 1
 
-        unique = {} # version number -> list of words unique to that version
-        common = [] # list of words common to all versions
+        unique = {}  # version number -> list of words unique to that version
+        common = []  # list of words common to all versions
         for w, versionlist in d.items():
             if len(versionlist) == 1:
                 unique.setdefault(versionlist[0], []).append(w)
@@ -346,11 +339,11 @@ class CosineIndexTests(ZCIndexTestsBase, testIndex.CosineIndexTest):
         # matrix of term weights for the rows are docids
         # and the columns are indexes into this list:
         l_wdt = [(1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.7, 1.7, 0.0),
-               (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0),
-               (0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0),
-               (1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.7),
-               (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.7, 1.7, 0.0),
-               (0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0)]
+                 (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0),
+                 (0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0),
+                 (1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.7),
+                 (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.7, 1.7, 0.0),
+                 (0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0)]
         l_Wd = [2.78, 1.73, 1.73, 2.21, 2.39, 1.41]
 
         for i in range(len(l_Wd)):
@@ -393,6 +386,7 @@ class CosineIndexTests(ZCIndexTestsBase, testIndex.CosineIndexTest):
                 score = scaled_int(float(score / SCALE_FACTOR) / wq)
                 self.assert_(0 <= score <= SCALE_FACTOR)
                 eq(d[doc], score)
+
 
 class OkapiIndexTests(ZCIndexTestsBase, testIndex.OkapiIndexTest):
 
@@ -539,12 +533,11 @@ class OkapiIndexTests(ZCIndexTestsBase, testIndex.OkapiIndexTest):
         self.assertEqual(r[-2][0], 1)   # penultimate loser
 
 
-############################################################################
-# Subclasses of QueryTestsBase must set a class variable IndexFactory to
-# the kind of index to be constructed.
+class QueryTestsBase(object):
 
-class QueryTestsBase(testQueryEngine.TestQueryEngine,
-                     testQueryParser.TestQueryParser):
+    # Subclasses of QueryTestsBase must set a class variable IndexFactory
+    # to the kind of index to be constructed.
+    IndexFactory = None
 
     # The FauxIndex in testQueryEngine contains four documents.
     # docid 1: foo, bar, ham
@@ -578,21 +571,25 @@ class QueryTestsBase(testQueryEngine.TestQueryEngine,
             self.zc_index.index_object(i + 1, obj)
 
     def compareSet(self, set, dict):
-        # XXX The FauxIndex and the real Index score documents very
+        # The FauxIndex and the real Index score documents very
         # differently.  The set comparison can't actually compare the
         # items, but it can compare the keys.  That will have to do for now.
         setkeys = list(set.keys())
-        dictkeys = dict.keys()
+        dictkeys = list(dict.keys())
         setkeys.sort()
         dictkeys.sort()
         self.assertEqual(setkeys, dictkeys)
 
 
-class CosineQueryTests(QueryTestsBase):
+class CosineQueryTests(QueryTestsBase,
+                       testQueryEngine.TestQueryEngine,
+                       testQueryParser.TestQueryParser):
     IndexFactory = CosineIndex
 
 
-class OkapiQueryTests(QueryTestsBase):
+class OkapiQueryTests(QueryTestsBase,
+                      testQueryEngine.TestQueryEngine,
+                      testQueryParser.TestQueryParser):
     IndexFactory = OkapiIndex
 
 
@@ -736,14 +733,3 @@ class PLexiconTests(unittest.TestCase):
         self.assertEqual(info['word_count'], 2)
         self.assertEqual(list(info['page_range']), [0])
         self.assertEqual(info['page_columns'], [['aaa', 'bbb']])
-
-
-def test_suite():
-    s = unittest.TestSuite()
-    for klass in (CosineIndexTests, OkapiIndexTests,
-                  CosineQueryTests, OkapiQueryTests, PLexiconTests):
-        s.addTest(unittest.makeSuite(klass))
-    return s
-
-if __name__=='__main__':
-    unittest.main(defaultTest='test_suite')

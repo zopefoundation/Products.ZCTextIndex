@@ -34,7 +34,7 @@ class Lexicon(Persistent):
     implements(ILexicon)
 
     _v_nextid = None
-    _wid_length_based = True # Flag to distinguish new and old lexica
+    _wid_length_based = True  # Flag to distinguish new and old lexica
 
     def __init__(self, *pipeline):
         self.clear()
@@ -46,7 +46,7 @@ class Lexicon(Persistent):
         self.length = Length()
         self._wid_length_based = False
         self._wids = OIBTree()  # word -> wid
-        self._words = IOBTree() # wid -> word
+        self._words = IOBTree()  # wid -> word
         # wid 0 is reserved for words that aren't in the lexicon (OOV -- out
         # of vocabulary).  This can happen, e.g., if a query contains a word
         # we never saw before, and that isn't a known stopword (or otherwise
@@ -77,7 +77,7 @@ class Lexicon(Persistent):
     def termToWordIds(self, text):
         last = _text2list(text)
         for element in self._pipeline:
-            process = getattr(element, "process_post_glob", element.process) 
+            process = getattr(element, "process_post_glob", element.process)
             last = process(last)
         wids = []
         for word in last:
@@ -129,7 +129,7 @@ class Lexicon(Persistent):
                 pat += re.escape(c)
         pat += "$"
         prog = re.compile(pat)
-        keys = self._wids.keys(prefix) # Keys starting at prefix
+        keys = self._wids.keys(prefix)  # Keys starting at prefix
         wids = []
         for key in keys:
             if not key.startswith(prefix):
@@ -178,11 +178,12 @@ def _text2list(text):
 
 # Sample pipeline elements
 
-class Splitter:
+
+class Splitter(object):
 
     import re
     rx = re.compile(r"(?L)\w+")
-    rxGlob = re.compile(r"(?L)\w+[\w*?]*") # See globToWordIds() above
+    rxGlob = re.compile(r"(?L)\w+[\w*?]*")  # See globToWordIds() above
 
     def process(self, lst):
         result = []
@@ -197,10 +198,11 @@ class Splitter:
         return result
 
 element_factory.registerFactory('Word Splitter',
-                                 'Whitespace splitter',
-                                 Splitter)
+                                'Whitespace splitter',
+                                Splitter)
 
-class CaseNormalizer:
+
+class CaseNormalizer(object):
 
     def process(self, lst):
         return [w.lower() for w in lst]
@@ -213,7 +215,8 @@ element_factory.registerFactory('Stop Words',
                                 ' Don\'t remove stop words',
                                 None)
 
-class StopWordRemover:
+
+class StopWordRemover(object):
 
     dict = get_stopdict().copy()
 
@@ -230,6 +233,7 @@ class StopWordRemover:
 element_factory.registerFactory('Stop Words',
                                 'Remove listed stop words only',
                                 StopWordRemover)
+
 
 class StopWordAndSingleCharRemover(StopWordRemover):
 

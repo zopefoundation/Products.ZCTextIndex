@@ -16,44 +16,52 @@
 Plugin text index for ZCatalog.
 """
 
-from PipelineFactory import element_factory
-from Products.ZCTextIndex import ZCTextIndex, HTMLSplitter
+from AccessControl import ModuleSecurityInfo
+
+from Products.ZCTextIndex.PipelineFactory import element_factory
+from Products.ZCTextIndex import ZCTextIndex
+from Products.ZCTextIndex import HTMLSplitter  # NOQA
+
 
 def initialize(context):
 
     context.registerClass(
         ZCTextIndex.ZCTextIndex,
-        permission = 'Add Pluggable Index',
-        constructors = (ZCTextIndex.manage_addZCTextIndexForm,
-                        ZCTextIndex.manage_addZCTextIndex,
-                        getIndexTypes),
+        permission='Add Pluggable Index',
+        constructors=(ZCTextIndex.manage_addZCTextIndexForm,
+                      ZCTextIndex.manage_addZCTextIndex,
+                      getIndexTypes),
         icon='www/index.gif',
         visibility=None
     )
 
     context.registerClass(
         ZCTextIndex.PLexicon,
-        permission = 'Add Vocabularies',
-        constructors = (ZCTextIndex.manage_addLexiconForm,
-                        ZCTextIndex.manage_addLexicon,
-                        getElementGroups, getElementNames),
+        permission='Add Vocabularies',
+        constructors=(ZCTextIndex.manage_addLexiconForm,
+                      ZCTextIndex.manage_addLexicon,
+                      getElementGroups, getElementNames),
         icon='www/lexicon.gif'
     )
 
-## Functions below are for use in the ZMI constructor forms ##
+# Functions below are for use in the ZMI constructor forms
+
 
 def getElementGroups(self):
     return element_factory.getFactoryGroups()
 
+
 def getElementNames(self, group):
     return element_factory.getFactoryNames(group)
+
 
 def getIndexTypes(self):
     return ZCTextIndex.index_types.keys()
 
-## Allow relevent exceptions to be caught in untrusted code
-from AccessControl import ModuleSecurityInfo
+# Allow relevant exceptions to be caught in untrusted code
 ModuleSecurityInfo('Products').declarePublic('ZCTextIndex')
 ModuleSecurityInfo('Products.ZCTextIndex').declarePublic('ParseTree')
-ModuleSecurityInfo('Products.ZCTextIndex.ParseTree').declarePublic('QueryError')
-ModuleSecurityInfo('Products.ZCTextIndex.ParseTree').declarePublic('ParseError')
+ModuleSecurityInfo(
+    'Products.ZCTextIndex.ParseTree').declarePublic('QueryError')
+ModuleSecurityInfo(
+    'Products.ZCTextIndex.ParseTree').declarePublic('ParseError')

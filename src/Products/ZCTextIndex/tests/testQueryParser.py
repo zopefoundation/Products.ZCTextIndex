@@ -12,7 +12,14 @@
 #
 ##############################################################################
 
-from unittest import TestCase, TestSuite, main, makeSuite
+from unittest import TestCase
+
+
+class FakeStopWordRemover(object):
+
+    def process(self, list):
+        return [word for word in list if word != "stop"]
+
 
 class TestInterfaces(TestCase):
 
@@ -214,13 +221,15 @@ class TestQueryParser(TestQueryParserBase):
         # Split by UTF-8 fullwidth space
         from Products.ZCTextIndex.ParseTree import AndNode
         from Products.ZCTextIndex.ParseTree import AtomNode
-        self.expect("foo\xe3\x80\x80bar", AndNode([AtomNode("foo"), AtomNode("bar")]))
+        self.expect("foo\xe3\x80\x80bar",
+                    AndNode([AtomNode("foo"), AtomNode("bar")]))
 
     def test025(self):
         # Split by Unicode fullwidth space
         from Products.ZCTextIndex.ParseTree import AndNode
         from Products.ZCTextIndex.ParseTree import AtomNode
-        self.expect(u"foo\u3000bar", AndNode([AtomNode(u"foo"), AtomNode(u"bar")]))
+        self.expect(u"foo\u3000bar",
+                    AndNode([AtomNode(u"foo"), AtomNode(u"bar")]))
 
     def test101(self):
         self.failure("")
@@ -340,20 +349,3 @@ class StopWordTestQueryParser(TestQueryParserBase):
 
     def test306(self):
         self.failure('stop AND NOT foo')
-
-
-class FakeStopWordRemover:
-
-    def process(self, list):
-        return [word for word in list if word != "stop"]
-
-
-def test_suite():
-    return TestSuite((makeSuite(TestQueryParser),
-                      makeSuite(StopWordTestQueryParser),
-                      makeSuite(TestInterfaces),
-                    ))
-
-
-if __name__=="__main__":
-    main(defaultTest='test_suite')

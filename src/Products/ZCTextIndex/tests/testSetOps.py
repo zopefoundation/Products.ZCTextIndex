@@ -12,12 +12,14 @@
 #
 ##############################################################################
 
-from unittest import TestCase, TestSuite, main, makeSuite
+import random
+from unittest import TestCase
 
 from BTrees.IIBTree import IIBTree, IIBucket
 
 from Products.ZCTextIndex.SetOps import mass_weightedIntersection
 from Products.ZCTextIndex.SetOps import mass_weightedUnion
+
 
 class TestSetOps(TestCase):
 
@@ -61,7 +63,7 @@ class TestSetOps(TestCase):
                     # Test the union.
                     expected = []
                     for key in allkeys:
-                        if x.has_key(key) or y.has_key(key):
+                        if key in x or key in y:
                             result = x.get(key, 0) * w1 + y.get(key, 0) * w2
                             expected.append((key, result))
                     expected.sort()
@@ -73,7 +75,7 @@ class TestSetOps(TestCase):
                     # Test the intersection.
                     expected = []
                     for key in allkeys:
-                        if x.has_key(key) and y.has_key(key):
+                        if key in x and key in y:
                             result = x[key] * w1 + y[key] * w2
                             expected.append((key, result))
                     expected.sort()
@@ -83,7 +85,6 @@ class TestSetOps(TestCase):
                     self.assertEqual(expected, list(got.items()))
 
     def testMany(self):
-        import random
         N = 15  # number of IIBTrees to feed in
         L = []
         commonkey = N * 1000
@@ -91,11 +92,11 @@ class TestSetOps(TestCase):
         for i in range(N):
             t = IIBTree()
             t[commonkey] = i
-            for j in range(N-i):
+            for j in range(N - i):
                 key = i + j
                 allkeys[key] = 1
-                t[key] = N*i + j
-            L.append((t, i+1))
+                t[key] = N * i + j
+            L.append((t, i + 1))
         random.shuffle(L)
         allkeys = allkeys.keys()
         allkeys.sort()
@@ -105,7 +106,7 @@ class TestSetOps(TestCase):
         for key in allkeys:
             sum = 0
             for t, w in L:
-                if t.has_key(key):
+                if key in t:
                     sum += t[key] * w
             expected.append((key, sum))
         # print 'union', expected
@@ -117,7 +118,7 @@ class TestSetOps(TestCase):
         for key in allkeys:
             sum = 0
             for t, w in L:
-                if t.has_key(key):
+                if key in t:
                     sum += t[key] * w
                 else:
                     break
@@ -127,9 +128,3 @@ class TestSetOps(TestCase):
         # print 'intersection', expected
         got = mass_weightedIntersection(L)
         self.assertEqual(expected, list(got.items()))
-
-def test_suite():
-    return makeSuite(TestSetOps)
-
-if __name__=="__main__":
-    main(defaultTest='test_suite')

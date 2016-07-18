@@ -20,13 +20,16 @@ from Products.ZCTextIndex.interfaces import IQueryParseTree
 from Products.ZCTextIndex.SetOps import mass_weightedIntersection
 from Products.ZCTextIndex.SetOps import mass_weightedUnion
 
+
 class QueryError(Exception):
     pass
+
 
 class ParseError(Exception):
     pass
 
-class ParseTreeNode:
+
+class ParseTreeNode(object):
 
     implements(IQueryParseTree)
 
@@ -53,6 +56,7 @@ class ParseTreeNode:
     def executeQuery(self, index):
         raise NotImplementedError
 
+
 class NotNode(ParseTreeNode):
 
     _nodeType = "NOT"
@@ -61,7 +65,8 @@ class NotNode(ParseTreeNode):
         return []
 
     def executeQuery(self, index):
-        raise QueryError, "NOT parse tree node cannot be executed directly"
+        raise QueryError("NOT parse tree node cannot be executed directly")
+
 
 class AndNode(ParseTreeNode):
 
@@ -91,6 +96,7 @@ class AndNode(ParseTreeNode):
             set = difference(set, notset)
         return set
 
+
 class OrNode(ParseTreeNode):
 
     _nodeType = "OR"
@@ -107,6 +113,7 @@ class OrNode(ParseTreeNode):
                 weighted.append((r, 1))
         return mass_weightedUnion(weighted)
 
+
 class AtomNode(ParseTreeNode):
 
     _nodeType = "ATOM"
@@ -117,12 +124,14 @@ class AtomNode(ParseTreeNode):
     def executeQuery(self, index):
         return index.search(self.getValue())
 
+
 class PhraseNode(AtomNode):
 
     _nodeType = "PHRASE"
 
     def executeQuery(self, index):
         return index.search_phrase(self.getValue())
+
 
 class GlobNode(AtomNode):
 

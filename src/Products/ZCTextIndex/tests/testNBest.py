@@ -12,9 +12,10 @@
 #
 ##############################################################################
 
-from unittest import TestCase, TestSuite, main, makeSuite
+from unittest import TestCase
 
 from Products.ZCTextIndex.NBest import NBest
+
 
 class NBestTest(TestCase):
 
@@ -55,7 +56,7 @@ class NBestTest(TestCase):
         reversed_inputs.reverse()
 
         # Test the N-best for a variety of n (1, 6, 11, ... 50).
-        for n in range(1, len(inputs)+1, 5):
+        for n in range(1, len(inputs) + 1, 5):
             expected = inputs[-n:]
             expected.reverse()
 
@@ -78,12 +79,6 @@ class NBestTest(TestCase):
                 self.assertEqual(nb.capacity(), n)
                 self.assertEqual(nb.getbest(), expected)
 
-                for i in range(1, n+1):
+                for i in range(1, n + 1):
                     self.assertEqual(nb.pop_smallest(), expected[-i])
                 self.assertRaises(IndexError, nb.pop_smallest)
-
-def test_suite():
-    return makeSuite(NBestTest)
-
-if __name__=='__main__':
-    main(defaultTest='test_suite')

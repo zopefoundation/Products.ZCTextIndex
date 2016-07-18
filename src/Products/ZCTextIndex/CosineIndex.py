@@ -25,6 +25,7 @@ from Products.ZCTextIndex.BaseIndex import inverse_doc_frequency
 from Products.ZCTextIndex.BaseIndex import scaled_int
 from Products.ZCTextIndex.BaseIndex import SCALE_FACTOR
 
+
 class CosineIndex(BaseIndex):
 
     implements(IIndex)
@@ -75,10 +76,9 @@ class CosineIndex(BaseIndex):
         L = []
         DictType = type({})
         for wid in wids:
-            assert self._wordinfo.has_key(wid)  # caller responsible for OOV
-            d2w = self._wordinfo[wid] # maps docid to w(docid, wid)
+            assert wid in self._wordinfo  # caller responsible for OOV
+            d2w = self._wordinfo[wid]  # maps docid to w(docid, wid)
             idf = inverse_doc_frequency(len(d2w), N)  # an unscaled float
-            #print "idf = %.3f" % idf
             if isinstance(d2w, DictType):
                 d2w = IIBucket(d2w)
             L.append((d2w, scaled_int(idf)))
@@ -106,11 +106,8 @@ class CosineIndex(BaseIndex):
             Wsquares += w * w
             d[wid] = w
         W = math.sqrt(Wsquares)
-        #print "W = %.3f" % W
         for wid, weight in d.items():
-            #print i, ":", "%.3f" % weight,
             d[wid] = scaled_int(weight / W)
-            #print "->", d[wid]
         return d, scaled_int(W)
 
     # The rest are helper methods to support unit tests
@@ -131,6 +128,7 @@ class CosineIndex(BaseIndex):
         wid, = self._lexicon.termToWordIds(t)
         map = self._wordinfo[wid]
         return scaled_int(math.log(1 + len(self._docweight) / float(len(map))))
+
 
 def doc_term_weight(count):
     """Return the doc-term weight for a term that appears count times."""

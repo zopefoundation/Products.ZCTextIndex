@@ -11,18 +11,15 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Lexicon unit tests.
-"""
-
-import unittest
 
 import os
 import sys
+import unittest
 
 import transaction
 
 
-class StupidPipelineElement:
+class StupidPipelineElement(object):
 
     def __init__(self, fromword, toword):
         self.__fromword = fromword
@@ -38,7 +35,7 @@ class StupidPipelineElement:
         return res
 
 
-class WackyReversePipelineElement:
+class WackyReversePipelineElement(object):
 
     def __init__(self, revword):
         self.__revword = revword
@@ -55,7 +52,7 @@ class WackyReversePipelineElement:
         return res
 
 
-class StopWordPipelineElement:
+class StopWordPipelineElement(object):
 
     def __init__(self, stopdict={}):
         self.__stopdict = stopdict
@@ -104,7 +101,7 @@ class LexiconTests(unittest.TestCase):
         wids = lexicon.sourceToWordIds('cats and dogs')
         self.assertEqual(len(wids), 3)
         first = wids[0]
-        self.assertEqual(wids, [first, first+1, first+2])
+        self.assertEqual(wids, [first, first + 1, first + 2])
 
     def testTermToWordIds(self):
         from Products.ZCTextIndex.Lexicon import Splitter
@@ -169,7 +166,7 @@ class LexiconTests(unittest.TestCase):
         wids = lexicon.termToWordIds('cats and dogs')
         self.assertEqual(len(wids), 3)
         first = wids[0]
-        self.assertEqual(wids, [first, first+1, first+2])
+        self.assertEqual(wids, [first, first + 1, first + 2])
 
     def testSplitterAdaptorNofold(self):
         from Products.ZCTextIndex.Lexicon import Splitter
@@ -179,14 +176,15 @@ class LexiconTests(unittest.TestCase):
         wids = lexicon.termToWordIds('cats and dogs')
         self.assertEqual(len(wids), 3)
         second = wids[1]
-        self.assertEqual(wids, [0, second, second+1])
+        self.assertEqual(wids, [0, second, second + 1])
 
     def testTwoElementPipeline(self):
         from Products.ZCTextIndex.Lexicon import Splitter
 
-        lexicon = self._makeOne(Splitter(),
-                          StupidPipelineElement('cats', 'fish'),
-                          WackyReversePipelineElement('fish'))
+        lexicon = self._makeOne(
+            Splitter(),
+            StupidPipelineElement('cats', 'fish'),
+            WackyReversePipelineElement('fish'))
         wids = lexicon.sourceToWordIds('cats and dogs')
         wids = lexicon.termToWordIds('hsif')
         self.assertEqual(len(wids), 1)
@@ -195,10 +193,11 @@ class LexiconTests(unittest.TestCase):
     def testThreeElementPipeline(self):
         from Products.ZCTextIndex.Lexicon import Splitter
 
-        lexicon = self._makeOne(Splitter(),
-                          StopWordPipelineElement({'and':1}),
-                          StupidPipelineElement('dogs', 'fish'),
-                          WackyReversePipelineElement('fish'))
+        lexicon = self._makeOne(
+            Splitter(),
+            StopWordPipelineElement({'and': 1}),
+            StupidPipelineElement('dogs', 'fish'),
+            WackyReversePipelineElement('fish'))
         wids = lexicon.sourceToWordIds('cats and dogs')
         wids = lexicon.termToWordIds('hsif')
         self.assertEqual(len(wids), 1)
@@ -209,15 +208,15 @@ class LexiconTests(unittest.TestCase):
         from Products.ZCTextIndex.Lexicon import Splitter
         from Products.ZCTextIndex.HTMLSplitter import HTMLWordSplitter
 
-        loc = locale.setlocale(locale.LC_ALL) # get current locale
-         # set German locale
+        loc = locale.setlocale(locale.LC_ALL)  # get current locale
+        # set German locale
         try:
             if sys.platform != 'win32':
                 locale.setlocale(locale.LC_ALL, 'de_DE.ISO8859-1')
             else:
                 locale.setlocale(locale.LC_ALL, 'German_Germany.1252')
         except locale.Error:
-            return # This test doesn't work here :-(
+            return  # This test doesn't work here :-(
         expected = ['m\xfclltonne', 'waschb\xe4r',
                     'beh\xf6rde', '\xfcberflieger']
         words = [" ".join(expected)]
@@ -225,7 +224,7 @@ class LexiconTests(unittest.TestCase):
         self.assertEqual(words, expected)
         words = HTMLWordSplitter().process(words)
         self.assertEqual(words, expected)
-        locale.setlocale(locale.LC_ALL, loc) # restore saved locale
+        locale.setlocale(locale.LC_ALL, loc)  # restore saved locale
 
 
 class LexiconConflictTests(unittest.TestCase):
@@ -278,10 +277,3 @@ class LexiconConflictTests(unittest.TestCase):
         transaction.commit()
         self.assertEqual(copy.length(), 11)
         self.assertEqual(copy.length(), len(copy._words))
-
-
-def test_suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(LexiconTests))
-    suite.addTest(unittest.makeSuite(LexiconConflictTests))
-    return suite

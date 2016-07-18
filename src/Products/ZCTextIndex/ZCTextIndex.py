@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Plug in text index for ZCatalog with relevance ranking.
-
-$Id$
 """
 
 from cgi import escape
@@ -37,10 +35,7 @@ from Products.PluginIndexes.common.util import parseIndexRequest
 from Products.PluginIndexes.common import safe_callable
 from Products.PluginIndexes.interfaces import IPluggableIndex
 
-from Products.ZCTextIndex.Lexicon import CaseNormalizer
 from Products.ZCTextIndex.Lexicon import Lexicon
-from Products.ZCTextIndex.Lexicon import Splitter
-from Products.ZCTextIndex.Lexicon import StopWordRemover
 from Products.ZCTextIndex.NBest import NBest
 from Products.ZCTextIndex.QueryParser import QueryParser
 from Products.ZCTextIndex.CosineIndex import CosineIndex
@@ -50,8 +45,13 @@ from Products.ZCTextIndex.interfaces import IZCTextIndex
 from Products.ZCTextIndex.OkapiIndex import OkapiIndex
 from Products.ZCTextIndex.PipelineFactory import element_factory
 
-index_types = {'Okapi BM25 Rank':OkapiIndex,
-               'Cosine Measure':CosineIndex}
+index_types = {'Okapi BM25 Rank': OkapiIndex,
+               'Cosine Measure': CosineIndex}
+
+try:
+    basestring
+except NameError:
+    basestring = str
 
 
 class ZCTextIndex(Persistent, Implicit, SimpleItem):
@@ -59,8 +59,6 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
     """Persistent text index.
     """
     implements(IZCTextIndex, IPluggableIndex)
-
-    ## Magic class attributes ##
 
     meta_type = 'ZCTextIndex'
     query_options = ('query',)
@@ -72,8 +70,6 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
     security = ClassSecurityInfo()
     security.declareObjectProtected(manage_zcatalog_indexes)
 
-    ## Constructor ##
-
     def __init__(self, id, extra=None, caller=None, index_factory=None,
                  field_name=None, lexicon_id=None):
         self.id = id
@@ -82,14 +78,14 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
         # via the silly "extra" record.
         self._fieldname = field_name or getattr(extra, 'doc_attr', '') or id
         self._indexed_attrs = self._fieldname.split(',')
-        self._indexed_attrs = [ attr.strip()
-                                for attr in self._indexed_attrs if attr ]
+        self._indexed_attrs = [attr.strip()
+                               for attr in self._indexed_attrs if attr]
 
         lexicon_id = lexicon_id or getattr(extra, 'lexicon_id', '')
         lexicon = getattr(caller, lexicon_id, None)
 
         if lexicon is None:
-            raise LookupError, 'Lexicon "%s" not found' % escape(lexicon_id)
+            raise LookupError('Lexicon "%s" not found' % escape(lexicon_id))
 
         if not ILexicon.providedBy(lexicon):
             raise ValueError('Object "%s" does not implement '
@@ -101,8 +97,8 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
 
         if index_factory is None:
             if extra.index_type not in index_types.keys():
-                raise ValueError, 'Invalid index type "%s"' % escape(
-                    extra.index_type)
+                raise ValueError('Invalid index type "%s"' % escape(
+                    extra.index_type))
             self._index_factory = index_types[extra.index_type]
             self._index_type = extra.index_type
         else:
@@ -110,10 +106,7 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
 
         self.index = self._index_factory(aq_base(self.getLexicon()))
 
-    ## Private Methods ##
-
     security.declarePrivate('getLexicon')
-
     def getLexicon(self):
         """Get the lexicon for this index
         """
@@ -142,10 +135,9 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
             self._v_lexicon = lexicon
             return lexicon
 
-    ## External methods not in the Pluggable Index API ##
+    # External methods not in the Pluggable Index API
 
     security.declareProtected(search_zcatalog, 'query')
-
     def query(self, query, nbest=10):
         """Return pair (mapping from docids to scores, num results).
 
@@ -160,7 +152,7 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
         chooser.addmany(results.items())
         return chooser.getbest(), len(results)
 
-    ## Pluggable Index APIs ##
+    # Pluggable Index APIs
 
     def index_object(self, documentId, obj, threshold=None):
         """Wrapper for  index_doc()  handling indexing of multiple attributes.
@@ -216,7 +208,7 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
             return None
         tree = QueryParser(self.getLexicon()).parseQuery(query_str)
         results = tree.executeQuery(self.index)
-        return  results, (self.id,)
+        return (results, (self.id, ))
 
     def getEntryForObject(self, documentId, default=None):
         """Return the list of words indexed for documentId"""
@@ -230,7 +222,7 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
     def uniqueValues(self, name=None, withLengths=0):
         raise NotImplementedError
 
-    ## The ZCatalog Index management screen uses these methods ##
+    # The ZCatalog Index management screen uses these methods
 
     def numObjects(self):
         """Return number of unique words in the index"""
@@ -250,7 +242,7 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
             pass
         self.index = self._index_factory(aq_base(self.getLexicon()))
 
-    ## User Interface Methods ##
+    # User Interface Methods
 
     manage_main = DTMLFile('dtml/manageZCTextIndex', globals())
 
@@ -280,6 +272,7 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
 
 InitializeClass(ZCTextIndex)
 
+
 def manage_addZCTextIndex(self, id, extra=None, REQUEST=None,
                           RESPONSE=None):
     """Add a text index"""
@@ -294,13 +287,14 @@ manage_addZCTextIndexForm = DTMLFile('dtml/addZCTextIndex', globals())
 
 manage_addLexiconForm = DTMLFile('dtml/addLexicon', globals())
 
+
 def manage_addLexicon(self, id, title='', elements=[], REQUEST=None):
     """Add ZCTextIndex Lexicon"""
 
     pipeline = []
     for el_record in elements:
         if not hasattr(el_record, 'name'):
-            continue # Skip over records that only specify element group
+            continue  # Skip over records that only specify element group
         element = element_factory.instantiate(el_record.group, el_record.name)
         if element is not None:
             if el_record.group == 'Word Splitter':
@@ -330,9 +324,9 @@ class PLexicon(Lexicon, Implicit, SimpleItem):
 
     meta_type = 'ZCTextIndex Lexicon'
 
-    manage_options = ({'label':'Overview', 'action':'manage_main'},
-                      {'label':'Query', 'action':'queryLexicon'},
-                     ) + SimpleItem.manage_options
+    manage_options = ({'label': 'Overview', 'action': 'manage_main'},
+                      {'label': 'Query', 'action': 'queryLexicon'},
+                      ) + SimpleItem.manage_options
 
     security = ClassSecurityInfo()
     security.declareObjectProtected(LexiconQueryPerm)
@@ -342,7 +336,7 @@ class PLexicon(Lexicon, Implicit, SimpleItem):
         self.title = str(title)
         PLexicon.inheritedAttribute('__init__')(self, *pipeline)
 
-    ## User Interface Methods ##
+    # User Interface Methods
 
     def getPipelineNames(self):
         """Return list of names of pipeline element classes"""
@@ -351,7 +345,6 @@ class PLexicon(Lexicon, Implicit, SimpleItem):
     _queryLexicon = DTMLFile('dtml/queryLexicon', globals())
 
     security.declareProtected(LexiconQueryPerm, 'queryLexicon')
-
     def queryLexicon(self, REQUEST, words=None, page=0, rows=20, cols=4):
         """Lexicon browser/query user interface
         """
@@ -366,8 +359,8 @@ class PLexicon(Lexicon, Implicit, SimpleItem):
         word_count = len(words)
         rows = max(min(rows, 500), 1)
         cols = max(min(cols, 12), 1)
-        page_count = word_count / (rows * cols) + \
-                     (word_count % (rows * cols) > 0)
+        page_count = (word_count / (rows * cols) +
+                      (word_count % (rows * cols) > 0))
         page = max(min(page, page_count - 1), 0)
         start = rows * cols * page
         end = min(rows * cols * (page + 1), word_count)
@@ -386,11 +379,11 @@ class PLexicon(Lexicon, Implicit, SimpleItem):
         info = dict(page=page,
                     rows=rows,
                     cols=cols,
-                    start_word=start+1,
+                    start_word=start + 1,
                     end_word=end,
                     word_count=word_count,
                     page_count=page_count,
-                    page_range=xrange(page_count),
+                    page_range=range(page_count),
                     page_columns=columns)
 
         if REQUEST is not None:

@@ -23,15 +23,16 @@ from zope.interface import implements
 
 from Products.ZCTextIndex.interfaces import INBest
 
-class NBest:
+
+class NBest(object):
     implements(INBest)
 
-    def __init__(self, N):
+    def __init__(self, n):
         "Build an NBest object to remember the N best-scoring objects."
 
-        if N < 1:
+        if n < 1:
             raise ValueError("NBest() argument must be at least 1")
-        self._capacity = N
+        self._capacity = n
 
         # This does a very simple thing with sorted lists.  For large
         # N, a min-heap can be unboundedly better in terms of data

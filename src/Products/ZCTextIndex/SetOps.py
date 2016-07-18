@@ -20,28 +20,34 @@ from BTrees.IIBTree import weightedUnion
 
 from Products.ZCTextIndex.NBest import NBest
 
-def mass_weightedIntersection(L):
+
+def mass_weightedIntersection(l):
     "A list of (mapping, weight) pairs -> their weightedIntersection IIBucket."
-    L = [(x, wx) for (x, wx) in L if x is not None]
-    if len(L) < 2:
-        return _trivial(L)
-    # Intersect with smallest first.  We expect the input maps to be
+    l = [(x, wx) for (x, wx) in l if x is not None]
+    if len(l) < 2:
+        return _trivial(l)
+    # Intersect with smallest first. We expect the input maps to be
     # IIBuckets, so it doesn't hurt to get their lengths repeatedly
     # (len(Bucket) is fast; len(BTree) is slow).
-    L.sort(lambda x, y: cmp(len(x[0]), len(y[0])))
-    (x, wx), (y, wy) = L[:2]
+
+    def _key(value):
+        return len(value)
+
+    l.sort(key=_key)
+    (x, wx), (y, wy) = l[:2]
     dummy, result = weightedIntersection(x, y, wx, wy)
-    for x, wx in L[2:]:
+    for x, wx in l[2:]:
         dummy, result = weightedIntersection(result, x, 1, wx)
     return result
 
-def mass_weightedUnion(L):
+
+def mass_weightedUnion(l):
     "A list of (mapping, weight) pairs -> their weightedUnion IIBucket."
-    if len(L) < 2:
-        return _trivial(L)
+    if len(l) < 2:
+        return _trivial(l)
     # Balance unions as closely as possible, smallest to largest.
-    merge = NBest(len(L))
-    for x, weight in L:
+    merge = NBest(len(l))
+    for x, weight in l:
         merge.add((x, weight), len(x))
     while len(merge) > 1:
         # Merge the two smallest so far, and add back to the queue.
@@ -52,13 +58,14 @@ def mass_weightedUnion(L):
     (result, weight), dummy = merge.pop_smallest()
     return result
 
-def _trivial(L):
-    # L is empty or has only one (mapping, weight) pair.  If there is a
+
+def _trivial(l):
+    # l is empty or has only one (mapping, weight) pair. If there is a
     # pair, we may still need to multiply the mapping by its weight.
-    assert len(L) <= 1
-    if len(L) == 0:
+    assert len(l) <= 1
+    if len(l) == 0:
         return IIBucket()
-    [(result, weight)] = L
+    [(result, weight)] = l
     if weight != 1:
         dummy, result = weightedUnion(IIBucket(), result, 0, weight)
     return result

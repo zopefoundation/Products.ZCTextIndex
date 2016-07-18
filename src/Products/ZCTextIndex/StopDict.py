@@ -18,10 +18,6 @@ The specific splitter and lexicon are customizable, but the default
 ZCTextIndex should do something useful.
 """
 
-def get_stopdict():
-    """Return a dictionary of stopwords."""
-    return _dict
-
 # This list of English stopwords comes from Lucene
 _words = [
     "a", "and", "are", "as", "at", "be", "but", "by",
@@ -34,3 +30,8 @@ _words = [
 _dict = {}
 for w in _words:
     _dict[w] = None
+
+
+def get_stopdict():
+    """Return a dictionary of stopwords."""
+    return _dict

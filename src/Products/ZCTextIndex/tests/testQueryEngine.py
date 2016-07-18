@@ -12,15 +12,16 @@
 #
 ##############################################################################
 
-from unittest import TestCase, TestSuite, main, makeSuite
+from unittest import TestCase
 
 from BTrees.IIBTree import IIBucket
 
 from Products.ZCTextIndex.QueryParser import QueryParser
-from Products.ZCTextIndex.ParseTree import ParseError, QueryError
+from Products.ZCTextIndex.ParseTree import QueryError
 from Products.ZCTextIndex.Lexicon import Lexicon, Splitter
 
-class FauxIndex:
+
+class FauxIndex(object):
 
     def search(self, term):
         b = IIBucket()
@@ -31,6 +32,7 @@ class FauxIndex:
         elif term == "ham":
             b[1] = b[2] = b[3] = b[4] = 1
         return b
+
 
 class TestQueryEngine(TestCase):
 
@@ -52,7 +54,7 @@ class TestQueryEngine(TestCase):
 
     def testExecuteQuery(self):
         self.compareQuery("foo AND bar", {1: 2})
-        self.compareQuery("foo OR bar", {1: 2, 2: 1, 3:1})
+        self.compareQuery("foo OR bar", {1: 2, 2: 1, 3: 1})
         self.compareQuery("foo AND NOT bar", {3: 1})
         self.compareQuery("foo AND foo AND foo", {1: 3, 3: 3})
         self.compareQuery("foo OR foo OR foo", {1: 3, 3: 3})
@@ -64,9 +66,3 @@ class TestQueryEngine(TestCase):
         from Products.ZCTextIndex.ParseTree import NotNode, AtomNode
         tree = NotNode(AtomNode("foo"))
         self.assertRaises(QueryError, tree.executeQuery, self.index)
-
-def test_suite():
-    return makeSuite(TestQueryEngine)
-
-if __name__=='__main__':
-    main(defaultTest='test_suite')

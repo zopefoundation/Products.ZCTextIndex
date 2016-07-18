@@ -55,28 +55,32 @@ Summarizing the default operator rules:
 - * and ? are used for globbing (i.e. prefix search), e.g. ``foo*''
 """
 import re
+import sys
 
 from zope.interface import implements
 
 from Products.ZCTextIndex.interfaces import IQueryParser
 from Products.ZCTextIndex import ParseTree
 
+if sys.version_info > (3, 0):
+    unicode = str
+
 # Create unique symbols for token types.
-_AND    = intern("AND")
-_OR     = intern("OR")
-_NOT    = intern("NOT")
+_AND = intern("AND")
+_OR = intern("OR")
+_NOT = intern("NOT")
 _LPAREN = intern("(")
 _RPAREN = intern(")")
-_ATOM   = intern("ATOM")
-_EOF    = intern("EOF")
+_ATOM = intern("ATOM")
+_EOF = intern("EOF")
 
 # Map keyword string to token type.
 _keywords = {
-    _AND:       _AND,
-    _OR:        _OR,
-    _NOT:       _NOT,
-    _LPAREN:    _LPAREN,
-    _RPAREN:    _RPAREN,
+    _AND: _AND,
+    _OR: _OR,
+    _NOT: _NOT,
+    _LPAREN: _LPAREN,
+    _RPAREN: _RPAREN,
 }
 
 # Regular expression to tokenize.
@@ -97,9 +101,10 @@ _tokenizer_regex = re.compile(r"""
 # Use unicode regex to treat fullwidth space characters defined in Unicode
 # as valid whitespace.
 _tokenizer_unicode_regex = re.compile(
-    _tokenizer_regex.pattern, _tokenizer_regex.flags|re.UNICODE)
+    _tokenizer_regex.pattern, _tokenizer_regex.flags | re.UNICODE)
 
-class QueryParser:
+
+class QueryParser(object):
 
     implements(IQueryParser)
 
@@ -131,7 +136,7 @@ class QueryParser:
         self._index = 0
 
         # Syntactical analysis.
-        self._ignored = [] # Ignored words in the query, for parseQueryEx
+        self._ignored = []  # Ignored words in the query, for parseQueryEx
         tree = self._parseOrExpr()
         self._require(_EOF)
         if tree is None:
@@ -153,7 +158,7 @@ class QueryParser:
         if not self._check(tokentype):
             t = self._tokens[self._index]
             msg = "Token %r required, %r found" % (tokentype, t)
-            raise ParseTree.ParseError, msg
+            raise ParseTree.ParseError(msg)
 
     def _check(self, tokentype):
         if self._tokentypes[self._index] is tokentype:
@@ -177,7 +182,7 @@ class QueryParser:
             L.append(self._parseAndExpr())
         L = filter(None, L)
         if not L:
-            return None # Only stopwords
+            return None  # Only stopwords
         elif len(L) == 1:
             return L[0]
         else:
@@ -198,7 +203,7 @@ class QueryParser:
             else:
                 L.append(t)
         if not L:
-            return None # Only stopwords
+            return None  # Only stopwords
         L.extend(Nots)
         if len(L) == 1:
             return L[0]
@@ -209,7 +214,7 @@ class QueryParser:
         if self._check(_NOT):
             t = self._parseTerm()
             if t is None:
-                return None # Only stopwords
+                return None  # Only stopwords
             return ParseTree.NotNode(t)
         else:
             return self._parseTerm()
@@ -225,7 +230,7 @@ class QueryParser:
                 nodes.append(self._parseAtom())
             nodes = filter(None, nodes)
             if not nodes:
-                return None # Only stopwords
+                return None  # Only stopwords
             structure = [(isinstance(nodes[i], ParseTree.NotNode), i, nodes[i])
                          for i in range(len(nodes))]
             structure.sort()

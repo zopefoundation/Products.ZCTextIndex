@@ -18,7 +18,8 @@ from zope.interface import implements
 from Products.ZCTextIndex.interfaces import ISplitter
 from Products.ZCTextIndex.PipelineFactory import element_factory
 
-class HTMLWordSplitter:
+
+class HTMLWordSplitter(object):
 
     implements(ISplitter)
 
@@ -43,13 +44,3 @@ class HTMLWordSplitter:
 element_factory.registerFactory('Word Splitter',
                                 'HTML aware splitter',
                                 HTMLWordSplitter)
-
-if __name__ == "__main__":
-    import sys
-    splitter = HTMLWordSplitter()
-    for path in sys.argv[1:]:
-        f = open(path, "rb")
-        buf = f.read()
-        f.close()
-        print path
-        print splitter.process([buf])

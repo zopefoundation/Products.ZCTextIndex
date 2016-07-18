@@ -11,12 +11,12 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Test zope.index.text.htmlsplitter
-"""
+
 import unittest
 
+
 class HTMLWordSplitterTests(unittest.TestCase):
-    # Subclasses must define '_getBTreesFamily'
+
     def _getTargetClass(self):
         from Products.ZCTextIndex.HTMLSplitter import HTMLWordSplitter
         return HTMLWordSplitter
@@ -70,8 +70,3 @@ class HTMLWordSplitterTests(unittest.TestCase):
         splitter = self._makeOne()
         self.assertEqual(splitter.processGlob(['abc?def hij*klm nop* qrs?']),
                          ['abc?def', 'hij*klm', 'nop*', 'qrs?'])
-
-def test_suite():
-    return unittest.TestSuite((
-        unittest.makeSuite(HTMLWordSplitterTests),
-    ))

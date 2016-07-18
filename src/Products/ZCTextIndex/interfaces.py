@@ -222,7 +222,7 @@ class IIndex(Interface):
 
     def length():
         """Return the number of words in the index."""
-        
+
     def document_count():
         """Return the number of documents in the index."""
 

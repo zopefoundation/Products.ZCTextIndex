@@ -42,15 +42,18 @@ from Products.ZCTextIndex.SetOps import mass_weightedUnion
 # save a lot of those).
 SCALE_FACTOR = 1024.0
 
+
 def scaled_int(f, scale=SCALE_FACTOR):
     # We expect only positive inputs, so "add a half and chop" is the
     # same as round().  Surprising, calling round() is significantly more
     # expensive.
     return int(f * scale + 0.5)
 
-def unique(L):
-    """Return a list of the unique elements in L."""
-    return IITreeSet(L).keys()
+
+def unique(l):
+    """Return a list of the unique elements in l."""
+    return IITreeSet(l).keys()
+
 
 class BaseIndex(Persistent):
 
@@ -92,11 +95,11 @@ class BaseIndex(Persistent):
         """Return the number of words in the index."""
         # This is overridden per instance
         return len(self._wordinfo)
-        
+
     def document_count(self):
         """Return the number of documents in the index"""
         # This is overridden per instance
-        return len(self._docweight)        
+        return len(self._docweight)
 
     def get_words(self, docid):
         """Return a list of the wordids for a given docid."""
@@ -105,7 +108,7 @@ class BaseIndex(Persistent):
 
     # A subclass may wish to extend or override this.
     def index_doc(self, docid, text):
-        if self._docwords.has_key(docid):
+        if docid in self._docwords:
             return self._reindex_doc(docid, text)
         wids = self._lexicon.sourceToWordIds(text)
         wid2weight, docweight = self._get_frequencies(wids)
@@ -172,7 +175,7 @@ class BaseIndex(Persistent):
         raise NotImplementedError
 
     def has_doc(self, docid):
-        return self._docwords.has_key(docid)
+        return docid in self._docwords
 
     # A subclass may wish to extend or override this.
     def unindex_doc(self, docid):
@@ -189,7 +192,7 @@ class BaseIndex(Persistent):
     def search(self, term):
         wids = self._lexicon.termToWordIds(term)
         if not wids:
-            return None # All docs match
+            return None  # All docs match
         wids = self._remove_oov_wids(wids)
         return mass_weightedUnion(self._search_wids(wids))
 
@@ -273,10 +276,10 @@ class BaseIndex(Persistent):
             # can't need conversion, and then we can avoid an expensive
             # len(IIBTree).
             if (isinstance(doc2score, type({})) and
-                len(doc2score) == self.DICT_CUTOFF):
+                    len(doc2score) == self.DICT_CUTOFF):
                 doc2score = IIBTree(doc2score)
         doc2score[docid] = f
-        self._wordinfo[wid] = doc2score # not redundant:  Persistency!
+        self._wordinfo[wid] = doc2score  # not redundant:  Persistency!
 
     #    self._mass_add_wordinfo(wid2weight, docid)
     #
@@ -299,18 +302,18 @@ class BaseIndex(Persistent):
                   len(doc2score) == self.DICT_CUTOFF):
                 doc2score = IIBTree(doc2score)
             doc2score[docid] = weight
-            self._wordinfo[wid] = doc2score # not redundant:  Persistency!
+            self._wordinfo[wid] = doc2score  # not redundant:  Persistency!
         self.length.change(new_word_count)
-
 
     def _del_wordinfo(self, wid, docid):
         doc2score = self._wordinfo[wid]
         del doc2score[docid]
         if doc2score:
-            self._wordinfo[wid] = doc2score # not redundant:  Persistency!
+            self._wordinfo[wid] = doc2score  # not redundant:  Persistency!
         else:
             del self._wordinfo[wid]
             self.length.change(-1)
+
 
 def inverse_doc_frequency(term_count, num_items):
     """Return the inverse doc frequency for a term,
