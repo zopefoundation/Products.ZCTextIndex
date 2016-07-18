@@ -65,22 +65,36 @@ from Products.ZCTextIndex import ParseTree
 if sys.version_info > (3, 0):
     unicode = str
 
+
+class Token(object):
+    __slots__ = ('text', )
+
+    def __init__(self, text):
+        self.text = text
+
+    def __str__(self):
+        return self.text
+
+    def __repr__(self):
+        return '<Token:%s>' % self.text
+
+
 # Create unique symbols for token types.
-_AND = intern("AND")
-_OR = intern("OR")
-_NOT = intern("NOT")
-_LPAREN = intern("(")
-_RPAREN = intern(")")
-_ATOM = intern("ATOM")
-_EOF = intern("EOF")
+_AND = Token('AND')
+_OR = Token('OR')
+_NOT = Token('NOT')
+_LPAREN = Token('(')
+_RPAREN = Token(')')
+_ATOM = Token('ATOM')
+_EOF = Token('EOF')
 
 # Map keyword string to token type.
 _keywords = {
-    _AND: _AND,
-    _OR: _OR,
-    _NOT: _NOT,
-    _LPAREN: _LPAREN,
-    _RPAREN: _RPAREN,
+    str(_AND): _AND,
+    str(_OR): _OR,
+    str(_NOT): _NOT,
+    str(_LPAREN): _LPAREN,
+    str(_RPAREN): _RPAREN,
 }
 
 # Regular expression to tokenize.
