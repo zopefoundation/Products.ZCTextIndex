@@ -12,8 +12,7 @@
 #
 ##############################################################################
 
-from os.path import join
-from setuptools import setup, find_packages, Extension
+from setuptools import setup, find_packages
 
 setup(name='Products.ZCTextIndex',
       version='3.0.dev0',
@@ -27,14 +26,6 @@ setup(name='Products.ZCTextIndex',
       packages=find_packages('src'),
       namespace_packages=['Products'],
       package_dir={'': 'src'},
-      ext_modules=[
-          Extension(
-              name='Products.ZCTextIndex.stopper',
-              sources=[join('src', 'Products', 'ZCTextIndex', 'stopper.c')]),
-          Extension(
-              name='Products.ZCTextIndex.okascore',
-              sources=[join('src', 'Products', 'ZCTextIndex', 'okascore.c')]),
-      ],
       classifiers=[
           "Development Status :: 6 - Mature",
           "Environment :: Web Environment",

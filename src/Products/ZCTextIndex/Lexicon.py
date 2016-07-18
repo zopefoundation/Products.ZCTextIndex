@@ -220,15 +220,8 @@ class StopWordRemover(object):
 
     dict = get_stopdict().copy()
 
-    try:
-        from Products.ZCTextIndex.stopper import process as _process
-    except ImportError:
-        def process(self, lst):
-            has_key = self.dict.has_key
-            return [w for w in lst if not has_key(w)]
-    else:
-        def process(self, lst):
-            return self._process(self.dict, lst)
+    def process(self, lst):
+        return [w for w in lst if w not in self.dict]
 
 element_factory.registerFactory('Stop Words',
                                 'Remove listed stop words only',

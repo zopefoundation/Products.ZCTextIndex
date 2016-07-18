@@ -4,6 +4,8 @@ Changelog
 3.0 (unreleased)
 ----------------
 
+- Replace stopper and okascore C implementations with pure-Python.
+
 - Remove HelpSys pages.
 
 - Remove various internal test helper modules.

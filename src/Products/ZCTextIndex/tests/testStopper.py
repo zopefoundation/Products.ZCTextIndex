@@ -11,7 +11,6 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Tests for the C version of the StopWordRemover."""
 
 import unittest
 
@@ -19,6 +18,7 @@ from Products.ZCTextIndex import stopper
 
 
 class StopperTest(unittest.TestCase):
+    # BBB tests for deprecated stopper.process function.
 
     def test_process_typeerror(self):
         self.assertRaises(TypeError, stopper.process, 42, [])

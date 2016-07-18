@@ -25,7 +25,6 @@ from Products.ZCTextIndex.interfaces import IIndex
 from Products.ZCTextIndex.BaseIndex import BaseIndex
 from Products.ZCTextIndex.BaseIndex import inverse_doc_frequency
 from Products.ZCTextIndex.BaseIndex import scaled_int
-from Products.ZCTextIndex.okascore import score
 
 
 class OkapiIndex(BaseIndex):
@@ -79,16 +78,15 @@ class OkapiIndex(BaseIndex):
             # Opportunistically upgrade _totaldoclen attribute to Length object
             self._totaldoclen = Length(int(self._totaldoclen + delta))
 
-    # The workhorse.  Return a list of (IIBucket, weight) pairs, one pair
-    # for each wid t in wids.  The IIBucket, times the weight, maps D to
-    # TF(D,t) * IDF(t) for every docid D containing t.
-    # As currently written, the weights are always 1, and the IIBucket maps
-    # D to TF(D,t)*IDF(t) directly, where the product is computed as a float
-    # but stored as a scaled_int.
-    # Cautions: okascore hardcodes the values of K, B1, and the scaled_int
-    # function.
-
     def _search_wids(self, wids):
+        # The workhorse. Return a list of (IIBucket, weight) pairs, one pair
+        # for each wid t in wids. The IIBucket, times the weight, maps D to
+        # TF(D,t) * IDF(t) for every docid D containing t.
+        # As currently written, the weights are always 1, and the IIBucket maps
+        # D to TF(D,t)*IDF(t) directly, where the product is computed
+        # as a float but stored as a scaled_int.
+        # Cautions: _search_wids hardcodes the the scaled_int function.
+
         if not wids:
             return []
         N = float(self.document_count())  # total # of docs
@@ -98,10 +96,10 @@ class OkapiIndex(BaseIndex):
             # _totaldoclen has not yet been upgraded
             doclen = self._totaldoclen
         meandoclen = doclen / N
-        # K1 = self.K1
-        # B = self.B
-        # K1_plus1 = K1 + 1.0
-        # B_from1 = 1.0 - B
+        K1 = self.K1
+        B = self.B
+        K1_plus1 = K1 + 1.0
+        B_from1 = 1.0 - B
 
         #                           f(D, t) * (k1 + 1)
         #   TF(D, t) =  -------------------------------------------
@@ -113,7 +111,14 @@ class OkapiIndex(BaseIndex):
             d2f = self._wordinfo[t]  # map {docid -> f(docid, t)}
             idf = inverse_doc_frequency(len(d2f), N)  # an unscaled float
             result = IIBucket()
-            score(result, d2f.items(), docid2len, idf, meandoclen)
+
+            # inner score loop, was implemented in C before
+            idf *= 1024.0  # float out part of the scaled_int computation
+            for docid, f in d2f.items():
+                lenweight = B_from1 + B * docid2len[docid] / meandoclen
+                tf = f * K1_plus1 / (f + K1 * lenweight)
+                result[docid] = int(tf * idf + 0.5)
+
             L.append((result, 1))
         return L
 
