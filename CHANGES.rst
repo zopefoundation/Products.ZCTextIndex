@@ -1,7 +1,7 @@
 Changelog
 =========
 
-3.0 (unreleased)
+3.0 (2016-07-18)
 ----------------
 
 - Replace stopper and okascore C implementations with pure-Python.
