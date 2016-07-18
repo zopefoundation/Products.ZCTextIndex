@@ -1,8 +1,8 @@
 Changelog
 =========
 
-2.14.0 (unreleased)
--------------------
+3.0 (unreleased)
+----------------
 
 - Update to ZODB 4.x as direct dependency. Which drops ZODB3 support.
 
