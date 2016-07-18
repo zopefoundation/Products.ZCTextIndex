@@ -95,12 +95,14 @@ class IZCLexicon(Interface):
     """Lexicon for ZCTextIndex.
     """
 
+
 class ISplitter(Interface):
     """A splitter."""
 
     def process(text):
         """Run the splitter over the input text, returning a list of terms.
         """
+
 
 class IPipelineElement(Interface):
 
@@ -115,6 +117,7 @@ class IPipelineElement(Interface):
 
         This is an optional method; if it is not used, process() is used.
         """
+
 
 class IPipelineElementFactory(Interface):
     """Class for creating pipeline elements by name"""
@@ -176,6 +179,7 @@ class IQueryParseTree(Interface):
         May raise ParseTree.QueryError.
         """
 
+
 class IQueryParser(Interface):
     """Interface for Query Parsers."""
 
@@ -211,6 +215,7 @@ class IQueryParser(Interface):
 
         May raise ParseTree.ParseError.
         """
+
 
 class IIndex(Interface):
     """Interface for an Index."""
@@ -274,6 +279,7 @@ class IIndex(Interface):
 
     def has_doc(docid):
         """Returns true if docid is an id of a document in the index"""
+
 
 class INBest(Interface):
     """NBest chooser Interface.
