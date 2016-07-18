@@ -1,9 +1,7 @@
 <dtml-var manage_page_header>
 
 <dtml-var "manage_form_title(this(), _,
-           form_title='Add ZCTextIndex',
-           help_product='ZCTextIndex',
-           help_topic='ZCTextIndex_Add.stx'
+           form_title='Add ZCTextIndex'
 	   )">
 
 

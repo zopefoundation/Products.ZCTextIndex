@@ -4,6 +4,10 @@ Changelog
 3.0 (unreleased)
 ----------------
 
+- Remove HelpSys pages.
+
+- Remove various internal test helper modules.
+
 - Remove old-style interface modules, use the interfaces module instead.
 
 - Update to ZODB 4.x as direct dependency. Which drops ZODB3 support.
