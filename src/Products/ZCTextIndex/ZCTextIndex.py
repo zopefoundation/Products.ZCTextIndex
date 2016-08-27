@@ -31,9 +31,18 @@ from OFS.SimpleItem import SimpleItem
 from Persistence import Persistent
 from zope.interface import implements
 
-from Products.PluginIndexes.common.util import parseIndexRequest
 from Products.PluginIndexes.common import safe_callable
 from Products.PluginIndexes.interfaces import IPluggableIndex
+
+# BBB New ZCatalog 4.0 release
+try:
+    from Products.ZCatalog.query import IndexQuery
+    from Products.PluginIndexes.interfaces import IQueryIndex
+except ImportError:
+    from zope.interface import Interface
+    from Products.PluginIndexes.common.util import \
+        parseIndexRequest as IndexQuery
+    IQueryIndex = Interface
 
 from Products.ZCTextIndex.Lexicon import Lexicon
 from Products.ZCTextIndex.NBest import NBest
@@ -58,7 +67,7 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
 
     """Persistent text index.
     """
-    implements(IZCTextIndex, IPluggableIndex)
+    implements(IZCTextIndex, IQueryIndex, IPluggableIndex)
 
     meta_type = 'ZCTextIndex'
     query_options = ('query',)
@@ -191,24 +200,18 @@ class ZCTextIndex(Persistent, Implicit, SimpleItem):
             self.index.unindex_doc(docid)
 
     def _apply_index(self, request):
-        """Apply query specified by request, a mapping containing the query.
-
-        Returns two object on success, the resultSet containing the
-        matching record numbers and a tuple containing the names of
-        the fields used
-
-        Returns None if request is not valid for this index.
-        """
-        record = parseIndexRequest(request, self.id, self.query_options)
+        record = IndexQuery(request, self.id, self.query_options)
         if record.keys is None:
             return None
+        return (self.query_index(record), (self.id, ))
 
+    def query_index(self, record, resultset=None):
         query_str = ' '.join(record.keys)
         if not query_str:
             return None
         tree = QueryParser(self.getLexicon()).parseQuery(query_str)
         results = tree.executeQuery(self.index)
-        return (results, (self.id, ))
+        return results
 
     def getEntryForObject(self, documentId, default=None):
         """Return the list of words indexed for documentId"""
