@@ -4,6 +4,8 @@ Changelog
 4.0 (unreleased)
 ----------------
 
+- Move code into ZCatalog distribution.
+
 - Implement new `IQueryIndex` interface.
 
 - Require at least Zope and ZCatalog 4.0.
