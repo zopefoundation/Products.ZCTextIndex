@@ -15,7 +15,7 @@
 from setuptools import setup, find_packages
 
 setup(name='Products.ZCTextIndex',
-      version='4.0.dev0',
+      version='4.0',
       url='http://pypi.python.org/pypi/Products.ZCTextIndex',
       license='ZPL 2.1',
       description='Obsolete distribution, use Products.ZCatalog.',
@@ -39,7 +39,7 @@ setup(name='Products.ZCTextIndex',
       ],
       install_requires=[
           'setuptools',
-          'Products.ZCatalog >= 4.0.a1',
+          'Products.ZCatalog >= 4.0.a2',
       ],
       include_package_data=True,
       zip_safe=False,
