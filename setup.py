@@ -39,7 +39,7 @@ setup(name='Products.ZCTextIndex',
       ],
       install_requires=[
           'setuptools',
-          'Products.ZCatalog >= 4.0.a2',
+          'Products.ZCatalog >= 4.0a2',
       ],
       include_package_data=True,
       zip_safe=False,
