@@ -16,7 +16,7 @@ from setuptools import setup, find_packages
 
 setup(name='Products.ZCTextIndex',
       version='4.0.1.dev0',
-      url='http://pypi.python.org/pypi/Products.ZCTextIndex',
+      url='https://github.com/zopefoundation/Products.ZCTextIndex',
       license='ZPL 2.1',
       description='Obsolete distribution, use Products.ZCatalog.',
       author='Zope Foundation and Contributors',
