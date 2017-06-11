@@ -4,6 +4,7 @@ Changelog
 4.0.2 (unreleased)
 ------------------
 
+- Mark as compatible with Python 2 and 3.
 
 4.0.1 (2016-08-30)
 ------------------
