@@ -14,7 +14,7 @@
 
 from setuptools import setup, find_packages
 
-__version__ = '4.0.2'
+__version__ = '4.0.3.dev0'
 
 
 setup(name='Products.ZCTextIndex',
