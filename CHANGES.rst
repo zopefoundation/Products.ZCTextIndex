@@ -1,7 +1,7 @@
 Changelog
 =========
 
-4.0.2 (unreleased)
+4.0.2 (2017-06-11)
 ------------------
 
 - Mark as compatible with Python 2 and 3.
